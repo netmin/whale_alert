@@ -32,3 +32,6 @@ transfer:
   "price_usd": 3500
 }
 ```
+
+The first item in `event.activity` must contain fields `rawValue`, `timestamp`,
+`fromAddress`, `toAddress`, `hash`, and `blockNumber`.
