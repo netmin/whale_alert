@@ -1,5 +1,5 @@
 import httpx
-from decimal import Decimal
+
 from app.config import settings
 from app.core.models import Event
 
