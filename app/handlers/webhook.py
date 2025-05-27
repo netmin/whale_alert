@@ -3,19 +3,20 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.core import parser, processor
+from app.core.alchemy_models import AlchemyEvent
 
 router = APIRouter()
 
 
 class AlchemyWebhookPayload(BaseModel):
-    event: dict
+    event: AlchemyEvent
     price_usd: Decimal | None = None
 
 
 @router.post("/alchemy")
 async def alchemy_webhook(payload: AlchemyWebhookPayload):
     try:
-        evt = parser.from_alchemy(payload.model_dump(), payload.price_usd)
+        evt = parser.from_alchemy(payload.event, payload.price_usd)
     except Exception as exc:  # pragma: no cover - simple validation
         raise HTTPException(status_code=400, detail="invalid payload") from exc
 
