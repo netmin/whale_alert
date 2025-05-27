@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED=1
 RUN pip install --no-cache-dir --upgrade pip uv
 
 COPY pyproject.toml uv.lock ./
-RUN uv pip install --no-cache-dir --system -r uv.lock
+RUN uv pip sync --no-cache --system uv.lock
 
 COPY app ./app
 COPY config.yaml ./config.yaml
