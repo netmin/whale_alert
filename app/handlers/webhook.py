@@ -19,16 +19,16 @@ class AlchemyLogsWebhookPayload(BaseModel):
 
 
 @router.post("/alchemy")
-async def alchemy_webhook(payload: dict):
+async def alchemy_webhook(
+    payload: AlchemyWebhookPayload | AlchemyLogsWebhookPayload,
+):
     try:
-        model = AlchemyWebhookPayload(**payload)
-        evt = parser.from_alchemy(model.event, model.price_usd)
-    except Exception:
-        try:
-            model = AlchemyLogsWebhookPayload(**payload)
-            evt = parser.from_alchemy_logs(model.data, model.price_usd)
-        except Exception as exc:  # pragma: no cover - simple validation
-            raise HTTPException(status_code=400, detail="invalid payload") from exc
+        if isinstance(payload, AlchemyWebhookPayload):
+            evt = parser.from_alchemy(payload.event, payload.price_usd)
+        else:
+            evt = parser.from_alchemy_logs(payload.data, payload.price_usd)
+    except Exception as exc:  # pragma: no cover - simple validation
+        raise HTTPException(status_code=400, detail="invalid payload") from exc
 
     await processor.process_event(evt)
     return {"status": "ok"}
