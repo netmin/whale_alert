@@ -8,7 +8,8 @@ ENV PYTHONUNBUFFERED=1
 RUN pip install --no-cache-dir --upgrade pip uv
 
 COPY pyproject.toml uv.lock ./
-RUN uv pip sync --no-cache --system uv.lock
+RUN uv export --format pylock.toml > pylock.toml \
+    && uv pip sync --no-cache --system pylock.toml
 
 COPY app ./app
 COPY config.yaml ./config.yaml
