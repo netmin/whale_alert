@@ -9,7 +9,7 @@ router = APIRouter()
 
 class AlchemyWebhookPayload(BaseModel):
     event: dict
-    price_usd: Decimal
+    price_usd: Decimal | None = None
 
 
 @router.post("/alchemy")
