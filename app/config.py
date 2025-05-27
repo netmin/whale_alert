@@ -1,10 +1,16 @@
 from pathlib import Path
 
 import yaml
-from pydantic import Field
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
+
+
+class SourcesSettings(BaseModel):
+    eth_infura: bool = False
+    btc_ws: bool = False
+    bitquery: bool = False
 
 
 class Settings(BaseSettings):
@@ -21,6 +27,8 @@ class Settings(BaseSettings):
     btc_threshold_btc: float = 50.0
     watch_addresses: list[str] = Field(default_factory=list)
     ignore_addresses: list[str] = Field(default_factory=list)
+
+    sources: SourcesSettings = Field(default_factory=SourcesSettings)
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", case_sensitive=False
