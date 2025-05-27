@@ -1,2 +1,4 @@
 log_level: DEBUG
 log_json: false
+eth_threshold_usd: 500000
+watch_addresses: []
