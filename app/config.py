@@ -13,8 +13,8 @@ class Settings(BaseSettings):
     # --- Secrets (.env) ---
     alchemy_api_key: str | None = Field(default=None, title="Alchemy API key")
     bitquery_api_key: str | None = Field(default=None)
-    telegram_bot_token: str
-    telegram_chat_id: str
+    telegram_bot_token: str | None = None
+    telegram_chat_id: str | None = None
 
     # --- Общие параметры ---
     log_level: str = "INFO"
