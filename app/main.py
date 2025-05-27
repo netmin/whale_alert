@@ -9,6 +9,7 @@ from app.config import settings
 from app.handlers import webhook
 from app.logging_config import configure_logging
 from app.sources import btc_mempool, infura, bitquery
+from app.core import storage
 
 configure_logging()
 log = structlog.get_logger()
@@ -25,6 +26,7 @@ async def lifespan(_: FastAPI):
         background_tasks.append(asyncio.create_task(btc_mempool.listen(settings)))
     if settings.sources.bitquery:
         background_tasks.append(asyncio.create_task(bitquery.poll(settings)))
+    background_tasks.append(asyncio.create_task(storage.flush_every()))
 
     log.info("service_started")
     try:
