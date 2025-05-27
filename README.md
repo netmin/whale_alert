@@ -35,3 +35,13 @@ transfer:
 
 The first item in `event.activity` must contain fields `rawValue`, `timestamp`,
 `fromAddress`, `toAddress`, `hash`, and `blockNumber`.
+
+Alternatively, you can send a payload that contains log data as returned by
+Alchemy's log webhooks:
+
+```json
+{
+  "data": {"block": {"logs": [...], "number": 0, "timestamp": 0}},
+  "price_usd": 3500
+}
+```

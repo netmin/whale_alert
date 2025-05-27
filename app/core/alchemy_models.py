@@ -11,3 +11,23 @@ class AlchemyActivity(BaseModel):
 
 class AlchemyEvent(BaseModel):
     activity: List[AlchemyActivity]
+
+class LogTransaction(BaseModel):
+    hash: str
+
+class LogEntry(BaseModel):
+    index: int
+    data: str
+    topics: list[str]
+    transaction: LogTransaction
+
+class LogBlock(BaseModel):
+    number: int
+    timestamp: int
+    logs: list[LogEntry]
+
+class LogData(BaseModel):
+    block: LogBlock
+
+class AlchemyLogsPayload(BaseModel):
+    data: LogData
