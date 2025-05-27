@@ -11,3 +11,11 @@ Example FastAPI application.
 ```bash
 uvicorn app.main:app --reload
 ```
+
+## Running with Docker
+
+Build and start the application using Docker Compose:
+
+```bash
+docker compose up --build
+```
