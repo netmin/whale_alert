@@ -3,6 +3,29 @@ services:
     build: .
     env_file:
       - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.a0-api.rule=Host(`alert.a0.trading`) && (PathPrefix(`/api`) || PathPrefix(`/webhook`))"
+      - "traefik.http.routers.a0-api.priority=10"
+      - "traefik.http.routers.a0-api.entrypoints=https"
+      - "traefik.http.routers.a0-api.tls=true"
+      - "traefik.http.routers.a0-api.tls.certresolver=forge"
+      - "traefik.http.services.a0-api.loadbalancer.server.port=8002"
+      - "traefik.http.routers.a0-health.rule=Host(`alert.a0.trading`) && Path(`/health`)"
+      - "traefik.http.routers.a0-health.entrypoints=https"
+      - "traefik.http.routers.a0-health.tls=true"
+      - "traefik.http.routers.a0-health.tls.certresolver=forge"
+      - "traefik.http.routers.a0-redirect.entrypoints=http"
+      - "traefik.http.routers.a0-redirect.rule=Host(`alert.a0.trading`)"
+      - "traefik.http.routers.a0-redirect.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
     ports:
-      - "8000:8000"
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+      - "8002:8002"
+    networks:
+      - traefik_proxy
+
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8002
+
+networks:
+  traefik_proxy:
+    external: true
