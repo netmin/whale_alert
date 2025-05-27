@@ -1,6 +1,6 @@
 from decimal import Decimal
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from app.core import parser, processor
 from app.core.alchemy_models import AlchemyEvent, AlchemyLogsPayload
@@ -9,11 +9,13 @@ router = APIRouter()
 
 
 class AlchemyWebhookPayload(BaseModel):
+    model_config = ConfigDict(union_mode="smart")
     event: AlchemyEvent
     price_usd: Decimal | None = None
 
 
 class AlchemyLogsWebhookPayload(BaseModel):
+    model_config = ConfigDict(union_mode="smart")
     data: AlchemyLogsPayload
     price_usd: Decimal | None = None
 
