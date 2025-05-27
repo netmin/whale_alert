@@ -3,7 +3,9 @@ import asyncio
 from contextlib import asynccontextmanager
 
 import structlog
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.handlers import webhook
@@ -41,3 +43,14 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="Whale-Alert", lifespan=lifespan)
 app.include_router(webhook.router, prefix="/webhook")
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    log.warning(
+        "validation_error",
+        path=request.url.path,
+        errors=exc.errors(),
+        body=exc.body,
+    )
+    return JSONResponse(status_code=422, content={"detail": exc.errors()})
