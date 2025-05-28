@@ -22,14 +22,12 @@ class AlchemyLogsWebhookPayload(BaseModel):
 
 @router.post("/alchemy")
 async def alchemy_webhook(payload: dict):
-    """Webhook for Alchemy events and logs."""
-
     try:
-        model = AlchemyWebhookPayload.model_validate(payload)
+        model = AlchemyWebhookPayload(**payload)
         evt = parser.from_alchemy(model.event, model.price_usd)
     except Exception:
         try:
-            model = AlchemyLogsWebhookPayload.model_validate(payload)
+            model = AlchemyLogsWebhookPayload(**payload)
             evt = parser.from_alchemy_logs(model.data, model.price_usd)
         except Exception as exc:  # pragma: no cover - simple validation
             raise HTTPException(status_code=400, detail="invalid payload") from exc
