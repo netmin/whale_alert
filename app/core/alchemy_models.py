@@ -26,8 +26,7 @@ class LogBlock(BaseModel):
     timestamp: int
     logs: list[LogEntry]
 
-class LogData(BaseModel):
-    block: LogBlock
-
 class AlchemyLogsPayload(BaseModel):
-    data: LogData
+    """Payload data for log webhooks."""
+
+    block: LogBlock

@@ -24,7 +24,7 @@ def from_alchemy(event: AlchemyEvent, price_usd: Decimal | None) -> Event:
 
 
 def from_alchemy_logs(payload: AlchemyLogsPayload, price_usd: Decimal | None) -> Event:
-    block = payload.data.block
+    block = payload.block
     log = block.logs[0]
 
     wei = int(log.data, 16)

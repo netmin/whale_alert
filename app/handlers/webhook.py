@@ -1,10 +1,12 @@
 from decimal import Decimal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict
+import structlog
 
 from app.core import parser, processor
 from app.core.alchemy_models import AlchemyEvent, AlchemyLogsPayload
 
+log = structlog.get_logger(__name__)
 router = APIRouter()
 
 
@@ -21,16 +23,22 @@ class AlchemyLogsWebhookPayload(BaseModel):
 
 
 @router.post("/alchemy")
-async def alchemy_webhook(
-    payload: AlchemyWebhookPayload | AlchemyLogsWebhookPayload,
-):
+async def alchemy_webhook(payload: dict):
+    log.debug("webhook_payload_received", payload=payload)
     try:
-        if isinstance(payload, AlchemyWebhookPayload):
-            evt = parser.from_alchemy(payload.event, payload.price_usd)
-        else:
-            evt = parser.from_alchemy_logs(payload.data, payload.price_usd)
-    except Exception as exc:  # pragma: no cover - simple validation
-        raise HTTPException(status_code=400, detail="invalid payload") from exc
+        model = AlchemyWebhookPayload(**payload)
+        log.debug("parsed_event_payload")
+        evt = parser.from_alchemy(model.event, model.price_usd)
+    except Exception as exc:
+        log.debug("parse_event_failed", err=str(exc))
+        try:
+            model = AlchemyLogsWebhookPayload(**payload)
+            log.debug("parsed_log_payload")
+            evt = parser.from_alchemy_logs(model.data, model.price_usd)
+        except Exception as exc2:  # pragma: no cover - simple validation
+            log.warning("invalid_payload", err=str(exc2))
+            raise HTTPException(status_code=400, detail="invalid payload") from exc2
 
     await processor.process_event(evt)
+    log.debug("event_processed")
     return {"status": "ok"}
