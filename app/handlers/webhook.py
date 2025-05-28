@@ -24,24 +24,16 @@ class AlchemyLogsWebhookPayload(BaseModel):
 
 @router.post("/alchemy")
 async def alchemy_webhook(payload: dict):
-<<<<<<< HEAD
     log.debug("webhook_payload_received", payload=payload)
     try:
         model = AlchemyWebhookPayload(**payload)
         log.debug("parsed_event_payload")
-=======
-    try:
-        model = AlchemyWebhookPayload(**payload)
->>>>>>> f0ee4aa (Restore manual parsing for Alchemy webhooks)
         evt = parser.from_alchemy(model.event, model.price_usd)
     except Exception as exc:
         log.debug("parse_event_failed", err=str(exc))
         try:
             model = AlchemyLogsWebhookPayload(**payload)
-<<<<<<< HEAD
             log.debug("parsed_log_payload")
-=======
->>>>>>> f0ee4aa (Restore manual parsing for Alchemy webhooks)
             evt = parser.from_alchemy_logs(model.data, model.price_usd)
         except Exception as exc2:  # pragma: no cover - simple validation
             log.warning("invalid_payload", err=str(exc2))
