@@ -25,19 +25,32 @@ class AlchemyLogsWebhookPayload(BaseModel):
 @router.post("/alchemy")
 async def alchemy_webhook(payload: dict):
     log.info("webhook_payload_received", payload=payload)
-    try:
-        model = AlchemyWebhookPayload(**payload)
+
+    if "event" in payload:
+        try:
+            model = AlchemyWebhookPayload(**payload)
+        except Exception as exc:  # pragma: no cover - validation
+            log.debug("parse_event_failed", err=str(exc))
+            raise HTTPException(
+                status_code=400, detail="invalid event payload"
+            ) from exc
+
         log.info("parsed_event_payload")
         evt = parser.from_alchemy(model.event, model.price_usd)
-    except Exception as exc:
-        log.debug("parse_event_failed", err=str(exc))
+
+    elif "data" in payload:
         try:
             model = AlchemyLogsWebhookPayload(**payload)
-            log.info("parsed_log_payload")
-            evt = parser.from_alchemy_logs(model.data, model.price_usd)
-        except Exception as exc2:  # pragma: no cover - simple validation
-            log.warning("invalid_payload", err=str(exc2))
-            raise HTTPException(status_code=400, detail="invalid payload") from exc2
+        except Exception as exc:  # pragma: no cover - validation
+            log.debug("parse_logs_failed", err=str(exc))
+            raise HTTPException(status_code=400, detail="invalid log payload") from exc
+
+        log.info("parsed_log_payload")
+        evt = parser.from_alchemy_logs(model.data, model.price_usd)
+
+    else:
+        log.warning("invalid_payload", err="missing event or data")
+        raise HTTPException(status_code=400, detail="invalid payload")
 
     await processor.process_event(evt)
     log.info("event_processed")
