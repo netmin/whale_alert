@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     telegram_bot_token: str | None = None
     telegram_chat_id: str | None = None
 
-    log_level: str = "INFO"
+    log_level: str = "DEBUG"
     log_json: bool = False
 
     eth_threshold_usd: float = 500_000.0
