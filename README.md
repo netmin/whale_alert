@@ -45,3 +45,14 @@ Alchemy's log webhooks:
   "price_usd": 3500
 }
 ```
+
+GraphQL log webhooks may wrap the same structure inside an `event` field:
+
+```json
+{
+  "event": {
+    "data": {"block": {"logs": [...], "number": 0, "timestamp": 0}}
+  },
+  "price_usd": 3500
+}
+```

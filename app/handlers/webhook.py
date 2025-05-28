@@ -27,16 +27,33 @@ async def alchemy_webhook(payload: dict):
     log.info("webhook_payload_received", payload=payload)
 
     if "event" in payload:
-        try:
-            model = AlchemyWebhookPayload(**payload)
-        except Exception as exc:  # pragma: no cover - validation
-            log.debug("parse_event_failed", err=str(exc))
-            raise HTTPException(
-                status_code=400, detail="invalid event payload"
-            ) from exc
+        event_payload = payload["event"]
+        # GraphQL log webhooks send log data as ``event.data``
+        if isinstance(event_payload, dict) and "data" in event_payload:
+            try:
+                model = AlchemyLogsWebhookPayload(
+                    data=event_payload["data"],
+                    price_usd=payload.get("price_usd"),
+                )
+            except Exception as exc:  # pragma: no cover - validation
+                log.debug("parse_logs_failed", err=str(exc))
+                raise HTTPException(
+                    status_code=400, detail="invalid log payload"
+                ) from exc
 
-        log.info("parsed_event_payload")
-        evt = parser.from_alchemy(model.event, model.price_usd)
+            log.info("parsed_log_payload")
+            evt = parser.from_alchemy_logs(model.data, model.price_usd)
+        else:
+            try:
+                model = AlchemyWebhookPayload(**payload)
+            except Exception as exc:  # pragma: no cover - validation
+                log.debug("parse_event_failed", err=str(exc))
+                raise HTTPException(
+                    status_code=400, detail="invalid event payload"
+                ) from exc
+
+            log.info("parsed_event_payload")
+            evt = parser.from_alchemy(model.event, model.price_usd)
 
     elif "data" in payload:
         try:
